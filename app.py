@@ -75,3 +75,6 @@ def submit():
         flash("There are errors in the form. Please fix them and submit again.", "danger")
         print('error',form.errors)
         return render_template('index.html',form=form,formclass=formclass)  
+    
+if __name__=='__main__':
+    app.run(debug=True)    
