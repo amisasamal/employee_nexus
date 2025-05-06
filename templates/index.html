@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../static/assets/css/master.min.css">
+    <link rel="stylesheet" href="../static/assets/css/fonts.min.css">
+
+    <link rel="stylesheet" href="../static/css/styles.css">
+
+    <title>Kindly Fill all the Details</title>
+
+
+
+</head>
+<body>
+    
+
+    <!-- get_flashed_messages() fetches all the flashed messages.     -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'message' else category }} mt-2">
+                {{ message }}
+                </div>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
+    <div class="container mt-5">
+
+        <h2 class="mb-5 text-center font-weight-bold">Employee Registration</h2>
+    
+        <form action="/submit" method="POST">
+
+
+            {{ form.hidden_tag() }}
+
+
+            <div class="form-box">
+
+                <div class="mb-4 font-weight-bold"><span style="color: red;">*</span> indicates required field</div>
+               
+                <div class="form-group">
+                    <!-- {{ form.salutation.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.salutation.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.salutation(class=formclass) }}
+                        <span class="message" id="salutation_error"></span>
+                        {% if form.salutation.errors %}
+                            <div class="message">{{ form.salutation.errors[0] }}</div>
+                        {% endif %}
+                    </div> 
+                </div>                             
+                    
+           
+        
+                <div class="form-group">
+                    <!-- {{ form.first_name.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.first_name.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.first_name(class=formclass) }}
+                        <span class="message" id="first_name_error"></span>
+                        {% if form.first_name.errors %}
+                            <div class="message">{{ form.first_name.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+
+                <div class="form-group">
+                    {{ form.middle_name.label(class="form-label") }}
+                    {{ form.middle_name(class=formclass) }}
+                </div>
+
+                <div class="form-group">
+                    <!-- {{ form.last_name.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.last_name.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.last_name(class=formclass) }}
+                        <span class="message" id="last_name_error"></span>
+                        {% if form.last_name.errors %}
+                            <div class="message">{{ form.last_name.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+        
+                <div class="form-group">
+                    <!-- {{ form.date_of_birth.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.date_of_birth.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.date_of_birth(class=formclass) }}
+                        <span class="message" id="date_of_birth_error"></span>
+                        {% if form.date_of_birth.errors %}
+                            <div class="message">{{ form.date_of_birth.errors[0] }}</div>
+                        {% endif %}
+                    </div>                   
+                </div>
+                
+        
+                <div class="form-group">
+                    <!-- {{ form.joined_on.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.joined_on.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.joined_on(class=formclass) }}
+                        <span class="message" id="joined_on_error"></span>
+                        {% if form.joined_on.errors %}
+                            <div class="message">{{ form.joined_on.errors[0] }}</div>
+                        {% endif %}
+                    </div>                   
+                </div>
+                
+        
+                <div class="form-group">
+                    <!-- {{ form.post.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.post.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.post(class=formclass) }}
+                        <span class="message" id="post_error"></span>
+                        {% if form.post.errors %}
+                            <div class="message">{{ form.post.errors[0] }}</div>
+                        {% endif %}
+                    </div>                    
+                </div>
+                
+        
+                <div class="form-group">
+                    <!-- {{ form.mobile_number.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.mobile_number.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-group">                        
+                        <div class="input-wrapper">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" style="background-color: #fff;">+91</span>
+                                {{ form.mobile_number(class=formclass) }}
+                            </div>
+                            <span class="message" id="mobile_number_error"></span>
+                            <span id="mobile_number_message" class="message"></span>
+                            {% if form.mobile_number.errors %}
+                                <div class="message">{{ form.mobile_number.errors[0] }}</div>
+                            {% endif %}
+                        </div>    
+                    </div>                   
+                </div>
+                <div class="conditions">
+                    <li id="digit_check">Must be exactly 10 digits</li>
+                    <li id="start_check">Must start with 6, 7, 8, or 9</li>
+                </div>
+               
+            
+                <div class="form-group">
+                    <!-- {{ form.email_id.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.email_id.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.email_id(class=formclass) }}
+                        <span class="message" id="email_id_error"></span>
+                        {% if form.email_id.errors %}
+                            <div class="message">{{ form.email_id.errors[0] }}</div>
+                        {% endif %}
+                    </div>                   
+                </div>
+                
+
+                <div class="form-group">
+                    <!-- {{ form.create_password.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.create_password.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.create_password(class=formclass) }}
+                        <span class="message" id="create_password_error"></span>
+                        <span id="create_password_message" class="message"></span>
+                        {% if form.create_password.errors %}
+                            <div class="message">{{ form.create_password.errors[0] }}</div>
+                        {% endif %}
+                    </div> 
+                </div>
+                <div class="conditions">
+                    <li id="length_check">Password must be at least 8 characters long.</li>
+                    <li id="special_check">Password must contain at least one special character.</li>
+                    <li id="case_check">Password must contain both uppercase and lowercase letters.</li>
+                </div>
+                
+
+                <div class="form-group">
+                    <!-- {{ form.confirm_password.label(class="form-label") }} -->
+                    <label class="form-label">{{ form.confirm_password.label.text }} <span style="color: red;">*</span></label>
+                    <div class="input-wrapper">
+                        {{ form.confirm_password(class=formclass) }}
+                        <span class="message" id="confirm_password_error"></span>
+                        <span id="confirm_password_message" class="message"></span>
+                        {% if form.confirm_password.errors %}
+                            <div class="message">{{ form.confirm_password.errors[0] }}</div>
+                        {% endif %}
+                    </div>                   
+                </div>
+               
+     
+
+                <div class="mt-5 text-center">
+                    {{ form.submit(class="btn btn-primary", style='width: 200px;') }}
+                </div>
+                
+
+            </div>    
+
+        </form>
+
+   
+
+</div>
+
+
+    <!--   JavaScript Files   -->
+    <script src="../static/js/form_validation.js"></script>
+    <script src="../static/js/required_error.js"></script>
+
+    <!--   Core JS Files   -->
+    <script src="../static/assets/js/core/jquery.3.2.1.min.js"></script>
+    <!-- master JS -->
+    <script src="../static/assets/js/master.min.js"></script>
+
+</body>
+</html>

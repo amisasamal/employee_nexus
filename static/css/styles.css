@@ -1,0 +1,49 @@
+.form-box{
+    width: 580px;
+    justify-self: center;
+}
+
+.form-group{
+    display: flex;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.form-group label {
+    width: 210px;
+    margin-bottom: 0;
+    text-align: right;
+    margin-right: 20px;
+}
+
+.formclass{
+    margin-bottom: -10px;
+}
+
+.is-invalid {
+    border: 1px solid red !important;
+}
+
+.message {
+    color: black;
+    background-color: rgb(249, 218, 218);
+    font-size: 1 em;
+    /* display: block; */
+    position: absolute;
+    margin-top: 1px;
+    margin-left: 3px;
+}
+
+.input-wrapper{
+    position: relative;
+    width: 100%;
+    /* margin-bottom: -10px; */
+}
+
+.conditions{
+    margin-top: -12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    margin-left: 170px;
+    color: #145992;
+}
