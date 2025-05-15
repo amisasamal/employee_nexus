@@ -1,3 +1,4 @@
+/* REGISTRATION */
 .form-box{
     width: 580px;
     justify-self: center;
@@ -46,4 +47,14 @@
     font-size: 14px;
     margin-left: 170px;
     color: #145992;
+}
+
+/* LOGIN */
+.login-box{
+    justify-self: center;
+}
+
+/* DASHBOARD */
+nav{
+ right:auto
 }

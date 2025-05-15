@@ -1,14 +1,15 @@
-from flask import Flask,render_template,request,flash,redirect,url_for
+from flask import Flask,render_template,request,flash,redirect,url_for,session
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, DateField, SelectField, SubmitField, PasswordField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, Optional, Regexp, EqualTo
-import random
-from werkzeug.security import generate_password_hash
+import uuid
+from werkzeug.security import generate_password_hash,check_password_hash
 
 import app_db
 
+#---------------------- REGISTRATION FORM ----------------------------
 class Simpleform(FlaskForm):
-    salutation = SelectField('Salutation:',choices=[('','Select'), ('Mr', 'Mr'), ('Mrs', 'Mrs'), ('Ms', 'Ms'), ('Dr', 'Dr')], validators=[DataRequired()])
+    salutation = SelectField('Salutation:',choices=[('','Select'), ('Mr', 'Mr'), ('Mrs', 'Mrs'), ('Ms', 'Ms'), ('Dr', 'Dr')], validators=[DataRequired(message="Please select a salutation.")])
     def validate_salutation(form, field):
         if field.data == '':
             raise ValidationError('Please select a salutation.')
@@ -27,11 +28,19 @@ class Simpleform(FlaskForm):
     confirm_password = PasswordField('Confirm Password:', validators=[DataRequired(), EqualTo('create_password', message='Passwords must match')])
     submit = SubmitField('Submit')
 
+#---------------------LOGIN FORM---------------------------
+class LoginForm(FlaskForm):
+    email = StringField('Email:', validators=[DataRequired(), Email(), Length(max=32)])
+    password = PasswordField('Password:', validators=[DataRequired(), Length(max=32)])
+    submit = SubmitField('Login')
+
 app=Flask(__name__)
 app.secret_key = 'sdrw35747o8[-0]ygfasa'
 
-def generate_id():
-    return random.randint(10000000, 99999999)
+def generate_employee_id():
+    return uuid.uuid4().hex[:8]  # 8-character unique string
+
+#----------------REGISTRATION---------------------
 
 @app.route('/')
 def index():
@@ -47,7 +56,7 @@ def submit():
 
     if form.validate_on_submit():
        emp_info={
-            'employee_id':generate_id(),
+            'employee_id':generate_employee_id(),
             'salutation':form.salutation.data.strip(),
             'first_name':form.first_name.data.strip(),
             'middle_name':form.middle_name.data.strip(),
@@ -76,5 +85,54 @@ def submit():
         print('error',form.errors)
         return render_template('index.html',form=form,formclass=formclass)  
     
+#-----------------LOGIN----------------------
+
+@app.route('/login',methods=['GET','POST'])
+def login():
+    form=LoginForm()
+    formclass = 'form-control'
+
+    if form.validate_on_submit():
+        email=form.email.data
+        password=form.password.data
+         # Fetch user data from DB
+        user = app_db.get_user_by_email(email)
+
+        if user and check_password_hash(user['password'], password):
+            flash('Login Successful!', 'success')
+
+            # Store user info in session (or just ID/email)
+            session['user'] = {
+                'email': user['email_id'],
+                'employee_id': user['employee_id']
+            }
+
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid email or password', 'danger')
+
+    return render_template('login.html', form=form, formclass=formclass)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user' not in session:
+        flash('Please log in first.', 'warning')
+        return redirect(url_for('login'))
+
+    email = session['user']['email']
+
+    # Fetch full user info from DB
+    user = app_db.get_user_by_email(email)
+
+    return render_template('dashboard.html', user=user)
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    print(session['user'])
+    session.clear()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
+#----------------------------------------------------------------------------------------------------------------------------------
+
 if __name__=='__main__':
     app.run(debug=True)    

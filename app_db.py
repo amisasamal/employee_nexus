@@ -8,6 +8,18 @@ def get_connection():
         database='employee_nexus'
     )
 
+def get_user_by_email(email):
+    conn = get_connection()  
+    my_cursor = conn.cursor() 
+    my_cursor.execute("SELECT * FROM employee_details WHERE email_id = %s", (email,))
+    row = my_cursor.fetchone() 
+    columns = [desc[0] for desc in my_cursor.description]
+    user = dict(zip(columns, row)) if row else None
+    my_cursor.close()
+    conn.close()
+    return user  # Returns the dictionary (or None)
+
+
 def submit_data(data):
     conn=get_connection()
     my_cursor=conn.cursor()
