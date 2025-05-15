@@ -99,7 +99,7 @@ def login():
         user = app_db.get_user_by_email(email)
 
         if user and check_password_hash(user['password'], password):
-            flash('Login Successful!', 'success')
+            # flash('Login Successful!', 'success')
 
             # Store user info in session (or just ID/email)
             session['user'] = {

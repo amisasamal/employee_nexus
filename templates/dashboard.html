@@ -20,12 +20,15 @@
 <body>
 
 
-    <nav class="navbar navbar-expand-lg" style="background: linear-gradient(to right, #007BFF, #00BFFF);">
+    <nav class="navbar navbar-expand-lg" style="background: linear-gradient(to right, #0270e7, #029ed2);">
         <div class="container-fluid">
-            <a class="navbar-brand mb-0 h1 text-white font-weight-bold" href="#">Nexus</a>
-
+            <div class="d-flex align-items-center">
+                <img src="../static/images/favicon.png" width="25em" class="mr-1"alt="logo"> 
+                <a class="navbar-brand mb-0 text-white h5 font-weight-bold" href="#">Nexus</a>
+            </div>
+            
             <form action="/logout" method="POST">
-                <button type="submit" class="btn btn-outline-light btn-sm shadow rounded-pill px-4">
+                <button type="submit" class="btn btn-outline-light btn-sm shadow px-4">
                     <i class="fa fa-sign-out me-2"></i> Logout
                 </button>
             </form>
@@ -34,21 +37,18 @@
     </nav>
 
 
-
-    <div class="card p-4 shadow mt-4">
-        <!-- <div class="card-body"> -->
-            <h5 class="card-title mb-4">
-                <span>My Profile</span>
-                <span>-</span>
-                <span>{{ user.salutation }} {{ user.first_name }} {{ user.last_name }}</span>
-            </h5>
+    <div class="card p-4 shadow">
+        <a class="card-header font-weight-bold">My Profile</a>
+        <div class="card-body">
+            <p><strong>{{ user.salutation }} {{ user.first_name }} {{ user.last_name }}</strong></p>
             <p><strong>Employee ID:</strong> {{ user.employee_id }}</p>
             <p><strong>Email:</strong> {{ user.email_id }}</p>
-            <p><strong>Mobile:</strong> {{ user.mobile_number }}</p>
+            <p><strong>Mobile No:</strong> {{ user.mobile_number }}</p>
             <p><strong>Post:</strong> {{ user.post }}</p>
             <p><strong>Date of Birth:</strong> {{ user.date_of_birth }}</p>
             <p><strong>Joined On:</strong> {{ user.joined_on }}</p>
-        <!-- </div> -->
+        </div>
+       
     </div>
 
     
