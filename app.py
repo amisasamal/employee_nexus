@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired, Length, Email, Optional, Regexp, Eq
 import uuid
 from werkzeug.security import generate_password_hash,check_password_hash
 
+#import os
 import app_db
 
 #---------------------- REGISTRATION FORM ----------------------------
@@ -30,12 +31,24 @@ class Simpleform(FlaskForm):
 
 #---------------------LOGIN FORM---------------------------
 class LoginForm(FlaskForm):
-    email = StringField('Email:', validators=[DataRequired(), Email(), Length(max=32)])
+    email = StringField('Email ID:', validators=[DataRequired(), Email(), Length(max=32)])
     password = PasswordField('Password:', validators=[DataRequired(), Length(max=32)])
     submit = SubmitField('Login')
 
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email ID:', validators=[DataRequired()])
+    submit = SubmitField('Next')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password:', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password:', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
+    submit = SubmitField('Reset Password')
+
+
 app=Flask(__name__)
 app.secret_key = 'sdrw35747o8[-0]ygfasa'
+#app.secret_key = os.getenv('SECRET_KEY', 'sdrw35747o8[-0]ygfasa')  # Use env var for secret key
+#Store sensitive configs (DB passwords, secret keys) in .env and access with os.getenv().
 
 def generate_employee_id():
     return uuid.uuid4().hex[:8]  # 8-character unique string
@@ -126,12 +139,61 @@ def dashboard():
 
     return render_template('dashboard.html', user=user)
 
+
 @app.route('/logout', methods=['POST'])
 def logout():
     print(session['user'])
     session.clear()
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
+
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    form=ForgotPasswordForm()
+    formclass = 'form-control'
+
+    if form.validate_on_submit():
+        email = form.email.data
+        user = app_db.get_user_by_email(email)
+        if user:
+            session['reset_email'] = user['email_id']
+            return redirect(url_for('reset_password'))
+        else:
+            flash("Email ID not found", "danger")
+            return redirect(url_for('forgot_password'))
+    return render_template('forgot_password.html',form=form,formclass=formclass)
+
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    if 'reset_email' not in session:
+        flash("Unauthorized access", "danger")
+        return redirect(url_for('login'))
+
+    form = ResetPasswordForm()
+    formclass = 'form-control'
+
+    if form.validate_on_submit():
+        hashed = generate_password_hash(form.password.data)
+        app_db.update_password(session['reset_email'], hashed)
+        session.pop('reset_email', None)
+        flash("Password reset successfull", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', form=form, formclass=formclass)
+
+
+#----------------------------------------------------------------------------------------------------------------------------------
+# Error handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 #----------------------------------------------------------------------------------------------------------------------------------
 
 if __name__=='__main__':

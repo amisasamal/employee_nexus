@@ -13,8 +13,6 @@
 
     <title>Kindly Fill all the Details</title>
 
-
-
 </head>
 <body>
     
@@ -35,7 +33,7 @@
 
     <div class="container mt-5">
 
-        <h2 class="mb-5 text-center font-weight-bold">Employee Registration</h2>
+        <h3 class="mb-5 text-center font-weight-bold">Create an Account</h3>
     
         <form action="/submit" method="POST">
 
@@ -44,6 +42,11 @@
 
 
             <div class="form-box">
+
+                <div class="d-flex mb-4">
+                    <b class="ml-2">Already a Registered user?</b>
+                    <a href="{{ url_for('login') }}" class="ml-2" style="text-decoration: underline;">Please sign in</a>
+                </div>
 
                 <div class="mb-4 font-weight-bold"><span style="color: red;">*</span> indicates required field</div>
                
