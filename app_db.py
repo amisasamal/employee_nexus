@@ -1,11 +1,14 @@
 import pymysql
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def get_connection():
     return pymysql.connect(
-        host='localhost',
-        user='amisa',
-        password='3amisa3@',
-        database='employee_nexus'
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASS"),
+        database=os.getenv("DB_NAME")
     )
 
 def submit_data(data):
@@ -31,18 +34,26 @@ def submit_data(data):
 def get_user_by_email(email):
     conn = get_connection()  
     my_cursor = conn.cursor() 
-    my_cursor.execute("SELECT * FROM employee_details WHERE email_id = %s", (email,))
-    row = my_cursor.fetchone() 
-    columns = [desc[0] for desc in my_cursor.description]
-    user = dict(zip(columns, row)) if row else None
-    my_cursor.close()
-    conn.close()
-    return user  # Returns the dictionary (or None)
+    try:
+        my_cursor.execute("SELECT * FROM employee_details WHERE email_id = %s", (email,))
+        row = my_cursor.fetchone() 
+        if row:
+            columns = [desc[0] for desc in my_cursor.description]
+            user = dict(zip(columns, row)) 
+            return user
+        return None
+    finally:
+        my_cursor.close()
+        conn.close()
 
 def update_password(email, hashed_password):
     conn = get_connection()
     my_cursor = conn.cursor()
-    my_cursor.execute("UPDATE employee_details SET password = %s WHERE email_id = %s", (hashed_password, email))
-    conn.commit()
-    my_cursor.close()
-    conn.close()    
+    try:
+        my_cursor.execute("UPDATE employee_details SET password = %s WHERE email_id = %s", (hashed_password, email))
+        conn.commit()
+    except pymysql.MySQLError as e:
+        print("Error updating password:", e)   
+    finally:     
+        my_cursor.close()
+        conn.close()    

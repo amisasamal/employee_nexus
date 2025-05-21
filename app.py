@@ -4,8 +4,10 @@ from wtforms import StringField, IntegerField, DateField, SelectField, SubmitFie
 from wtforms.validators import DataRequired, Length, Email, Optional, Regexp, EqualTo
 import uuid
 from werkzeug.security import generate_password_hash,check_password_hash
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
+import os
 
-#import os
 import app_db
 
 #---------------------- REGISTRATION FORM ----------------------------
@@ -46,9 +48,20 @@ class ResetPasswordForm(FlaskForm):
 
 
 app=Flask(__name__)
-app.secret_key = 'sdrw35747o8[-0]ygfasa'
-#app.secret_key = os.getenv('SECRET_KEY', 'sdrw35747o8[-0]ygfasa')  # Use env var for secret key
-#Store sensitive configs (DB passwords, secret keys) in .env and access with os.getenv().
+app.secret_key = os.getenv('SECRET_KEY')
+
+
+# Email Config
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Use your provider's SMTP
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # Consider using an app password(not your gmail password)
+app.config['MAIL_DEFAULT_SENDER'] = 'amisasamal3@gmail.com'
+
+mail = Mail(app)
+# Token Serializer
+s = URLSafeTimedSerializer(app.secret_key)
 
 def generate_employee_id():
     return uuid.uuid4().hex[:8]  # 8-character unique string
@@ -82,7 +95,10 @@ def submit():
             'password':generate_password_hash(form.confirm_password.data.strip())
        }
        print('emp_info',emp_info)   
-       # return redirect(url_for('index'))
+       existing_user = app_db.get_user_by_email(emp_info['email_id'])
+       if existing_user:
+            flash("Email already registered.", "danger")
+            return redirect(url_for('index'))
 
        try:
             app_db.submit_data(emp_info) 
@@ -144,44 +160,64 @@ def dashboard():
 def logout():
     print(session['user'])
     session.clear()
-    flash('You have been logged out.', 'success')
+    flash('You have successfully logged out.', 'success')
     return redirect(url_for('login'))
 
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
-    form=ForgotPasswordForm()
+    form = ForgotPasswordForm()
     formclass = 'form-control'
 
     if form.validate_on_submit():
-        email = form.email.data
+        email = form.email.data.strip()
         user = app_db.get_user_by_email(email)
+
         if user:
-            session['reset_email'] = user['email_id']
-            return redirect(url_for('reset_password'))
+            token = s.dumps(email, salt='reset-password-salt')
+            link = url_for('reset_with_token', token=token, _external=True)
+
+            # Send email
+            try:
+                msg = Message("Password Reset Request", recipients=[email])
+                msg.body = f"Hi {user['first_name']},\n\nClick the link below to reset your password:\n{link}\n\nThis link will expire in 15 minutes."
+                mail.send(msg)
+                flash("A password reset link has been sent to your email.", "success")
+            except Exception as e:
+                print("Mail Error:", e)
+                flash("There was an issue sending the email. Try again later.", "danger")
+
+            return redirect(url_for('login'))
         else:
-            flash("Email ID not found", "danger")
+            flash("Email ID not found.", "danger")
             return redirect(url_for('forgot_password'))
-    return render_template('forgot_password.html',form=form,formclass=formclass)
+
+    return render_template('forgot_password.html', form=form, formclass=formclass)
 
 
-@app.route('/reset-password', methods=['GET', 'POST'])
-def reset_password():
-    if 'reset_email' not in session:
-        flash("Unauthorized access", "danger")
-        return redirect(url_for('login'))
 
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_with_token(token):
     form = ResetPasswordForm()
     formclass = 'form-control'
 
+    try:
+        email = s.loads(token, salt='reset-password-salt', max_age=900)  # 15 minutes validity
+    except SignatureExpired:
+        flash("The reset link has expired.", "danger")
+        return redirect(url_for('forgot_password'))
+    except BadSignature:
+        flash("Invalid or tampered reset link.", "danger")
+        return redirect(url_for('forgot_password'))
+
     if form.validate_on_submit():
-        hashed = generate_password_hash(form.password.data)
-        app_db.update_password(session['reset_email'], hashed)
-        session.pop('reset_email', None)
-        flash("Password reset successfull", "success")
+        hashed_password = generate_password_hash(form.password.data)
+        app_db.update_password(email, hashed_password)
+        flash("Your password has been reset successfully!", "success")
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', form=form, formclass=formclass)
+
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
