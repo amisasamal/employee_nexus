@@ -1,2 +1,2 @@
-FLASK_APP=app.py
+FLASK_APP=run:app
 FLASK_dEBUG=1
