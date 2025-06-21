@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_mail import Message
 
 from .forms import LoginForm, ForgotPasswordForm, ResetPasswordForm
-from ..models.employee import get_user_by_email, update_password
+from ..db_models.employee_db import get_user_by_email, update_password
 from .. import mail, s
 
 auth_bp = Blueprint('auth', __name__)

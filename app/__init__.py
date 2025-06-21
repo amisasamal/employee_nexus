@@ -23,7 +23,7 @@ def create_app(config_class=None):
     s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     
     # Register blueprints
-    from .auth.routes import auth_bp
+    from .authentication.routes import auth_bp
     from .employee.routes import employee_bp
     
     app.register_blueprint(auth_bp)
