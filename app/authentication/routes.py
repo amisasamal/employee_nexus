@@ -2,8 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_mail import Message
 
-from .forms import LoginForm, ForgotPasswordForm, ResetPasswordForm
-from ..db_models.employee_db import get_user_by_email, update_password
+from .forms import LoginForm, ForgotPasswordForm, ResetPasswordForm, OTPVerificationForm
+from ..db_models.auth_db import get_user_by_email, update_password
+from ..db_models.verify_otp_db import generate_otp, store_otp, verify_otp
 from .. import mail, s
 
 auth_bp = Blueprint('auth', __name__)
@@ -47,41 +48,145 @@ def forgot_password():
         user = get_user_by_email(email)
 
         if user:
-            token = s.dumps(email, salt='reset-password-salt')
-            link = url_for('auth.reset_with_token', token=token, _external=True)
+            # Generate and store OTP
+            otp_code = generate_otp()
+            if store_otp(email, otp_code):
+                # Send OTP via email
+                try:
+                    msg = Message("Password Reset OTP", recipients=[email])
+                    msg.body = f"""Hi {user['first_name']},
 
-            # Send email
-            try:
-                msg = Message("Password Reset Request", recipients=[email])
-                msg.body = f"Hi {user['first_name']},\n\nClick the link below to reset your password:\n{link}\n\nThis link will expire in 15 minutes."
-                mail.send(msg)
-                flash("A password reset link has been sent to your email.", "success")
-            except Exception as e:
-                print("Mail Error:", e)
-                flash("There was an issue sending the email. Try again later.", "danger")
+Your password reset OTP is: {otp_code}
 
-            return redirect(url_for('auth.login'))
+This OTP is valid for 10 minutes and can be used only once.
+
+If you didn't request this, please ignore this email.
+
+Best regards,
+Employee Nexus Team"""
+                    mail.send(msg)
+                    
+                    # Store email in session for OTP verification
+                    session['reset_email'] = email
+                    flash("OTP has been sent to your email. Please check and enter it below.", "success")
+                    return redirect(url_for('auth.verify_otp_route'))  # Fixed this line
+                    
+                except Exception as e:
+                    print("Mail Error:", e)
+                    flash("There was an issue sending the OTP. Try again later.", "danger")
+            else:
+                flash("Failed to generate OTP. Please try again.", "danger")
         else:
             flash("Email ID not found.", "danger")
-            return redirect(url_for('auth.forgot_password'))
 
     return render_template('forgot_password.html', form=form, formclass=formclass)
 
-@auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
-def reset_with_token(token):
+@auth_bp.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp_route():
+    if 'reset_email' not in session:
+        flash("Please start the password reset process again.", "warning")
+        return redirect(url_for('auth.forgot_password'))
+    
+    form = OTPVerificationForm()
+    form.email.data = session['reset_email']  # Pre-fill email
+    formclass = 'form-control'
+
+    if form.validate_on_submit():
+        email = session['reset_email']
+        otp_code = form.otp_code.data
+        
+        success, message = verify_otp(email, otp_code)
+        
+        if success:
+            # Generate secure token for password reset
+            token = s.dumps(email, salt='verified-reset-salt')
+            session['verified_reset_token'] = token
+            flash("OTP verified successfully! You can now reset your password.", "success")
+            return redirect(url_for('auth.reset_password_verified', token=token))
+        else:
+            flash(message, "danger")
+
+    return render_template('verify_otp.html', form=form, formclass=formclass)
+
+@auth_bp.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    if 'reset_email' not in session:
+        flash("Please start the password reset process again.", "warning")
+        return redirect(url_for('auth.forgot_password'))
+    
+    email = session['reset_email']
+    user = get_user_by_email(email)
+    
+    if user:
+        # Generate and store new OTP
+        otp_code = generate_otp()
+        if store_otp(email, otp_code):
+            # Send new OTP via email
+            try:
+                msg = Message("New Password Reset OTP - Employee Nexus", recipients=[email])
+                msg.body = f"""Hi {user['first_name']},
+
+Your new password reset OTP is: {otp_code}
+
+This OTP is valid for 10 minutes and can be used only once.
+
+If you didn't request this, please ignore this email.
+
+Best regards,
+Employee Nexus Team"""
+                mail.send(msg)
+                flash("New OTP has been sent to your email!", "success")
+                
+            except Exception as e:
+                print("Mail Error:", e)
+                flash("There was an issue sending the OTP. Try again later.", "danger")
+        else:
+            flash("Failed to generate OTP. Please try again.", "danger")
+    else:
+        flash("Email not found.", "danger")
+    
+    # Stay on the same OTP verification page
+    return redirect(url_for('auth.verify_otp_route'))
+
+@auth_bp.route('/reset-password-verified/<token>', methods=['GET', 'POST'])
+def reset_password_verified(token):
+    # Verify this is a verified token
+    if session.get('verified_reset_token') != token:
+        flash("Unauthorized access. Please complete OTP verification first.", "danger")
+        return redirect(url_for('auth.forgot_password'))
+    
+    try:
+        email = s.loads(token, salt='verified-reset-salt', max_age=600)  # 10 minutes
+    except:
+        flash("Reset session expired. Please start again.", "danger")
+        return redirect(url_for('auth.forgot_password'))
+
     form = ResetPasswordForm()
     formclass = 'form-control'
 
-    try:
-        email = s.loads(token, salt='reset-password-salt', max_age=900)  # 15 minutes validity
-    except:
-        flash("The reset link is invalid or has expired.", "danger")
-        return redirect(url_for('auth.forgot_password'))
+    if request.method == 'POST':
+        print("POST request received")  # Debug
+        print(f"Form data: {request.form}")  # Debug
+        print(f"Form validates: {form.validate()}")  # Debug
+        print(f"Form errors: {form.errors}")  # Debug
 
     if form.validate_on_submit():
+        print(f"Form validated successfully for email: {email}")  # Debug
         hashed_password = generate_password_hash(form.password.data)
-        update_password(email, hashed_password)
-        flash("Your password has been reset successfully!", "success")
-        return redirect(url_for('auth.login'))
+        
+        # Update password
+        try:
+            update_password(email, hashed_password)
+            print("Password updated successfully")  # Debug
+            
+            # Clear session data
+            session.pop('reset_email', None)
+            session.pop('verified_reset_token', None)
+            
+            flash("Your password has been reset successfully!", "success")
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            print(f"Error updating password: {e}")  # Debug
+            flash("Error updating password. Please try again.", "danger")
 
     return render_template('reset_password.html', form=form, formclass=formclass)

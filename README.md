@@ -1,6 +1,6 @@
 # Employee Nexus 🏢
 
-A modern Flask web application with automated CI/CD pipeline for employee management.
+A comprehensive Flask web application with automated CI/CD pipeline for complete employee management and attendance tracking.
 
 ## 🚀 Live Demo
 
@@ -8,31 +8,121 @@ Production Application: employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasti
 
 ## ✨ Features
 
-🐍 Flask web framework
-🐳 Docker containerization
-⚡ GitHub Actions CI/CD pipeline
-☁️ AWS Elastic Beanstalk deployment
-🔄 Automatic deployment on push to main
-📊 Health monitoring endpoint
-🔒 Secure environment configuration
+### Core Business Features
+
+🏢 Employee Management - Comprehensive employee profile and data management
+⏰ Attendance Tracking - Real-time clock in/out with automated time calculations
+📊 Dashboard Analytics - Interactive attendance monitoring and reporting
+🔐 Authentication System - Secure login with OTP verification
+👥 User Management - Role-based access control and user administration
+📈 Attendance History - Detailed historical attendance records
+🕐 Real-time Status - Live employee status tracking
+
+### Technical Features
+
+🐍 Flask Web Framework - Modern Python web development
+🐳 Docker Containerization - Consistent deployment across environments
+⚡ GitHub Actions CI/CD - Automated testing and deployment pipeline
+☁️ AWS Elastic Beanstalk - Scalable cloud hosting
+🔄 Automatic Deployment - Zero-downtime deployments on push
+📊 Health Monitoring - Application status and performance tracking
+🔒 Secure Configuration - Environment-based security settings
+🗄️ Modular Database - Organized data layer with separation of concerns
 
 ## 🛠 Tech Stack
 
 Backend: Python, Flask
+Database: MySQL
 Containerization: Docker
 CI/CD: GitHub Actions
 Cloud: AWS Elastic Beanstalk
-Database: SQLite (development), PostgreSQL (production ready)
+Frontend: HTML5, CSS3, JavaScript, Bootstrap 5
+Security: Werkzeug password hashing, Flask-Login, OTP Verification, Session Management
+
+## 📁 Project Structure
+
+employee_nexus/
+├── .github/
+│ └── workflows/
+│ └── deploy.yml # GitHub Actions CI/CD pipeline
+├── app/ # Main Flask application
+│ ├── **init**.py # App factory and configuration
+│ ├── config.py # Application configuration
+│ ├── attendance/ # Attendance management module
+│ │ ├── **init**.py
+│ │ ├── forms.py # Attendance forms and validation
+│ │ └── routes.py # Clock in/out, dashboard routes
+│ ├── authentication/ # User authentication module
+│ │ ├── **init**.py
+│ │ ├── forms.py # Login, forgot password, OTP forms
+│ │ └── routes.py # Auth routes and session management
+│ ├── db_models/ # Database layer (Data Access Layer)
+│ │ ├── **init**.py
+│ │ ├── attendance_db.py # Attendance data operations
+│ │ ├── auth_db.py # Authentication data operations
+│ │ ├── base_db.py # Database connection and base operations
+│ │ ├── employee_db.py # Employee data operations
+│ │ └── verify_otp_db.py # OTP verification operations
+│ ├── employee/ # Employee management module
+│ │ ├── **init**.py
+│ │ ├── forms.py # Employee registration forms
+│ │ └── routes.py # Employee CRUD operations
+│ ├── static/ # Static assets
+│ │ ├── css/ # Stylesheets
+│ │ ├── js/ # JavaScript files
+│ │ └── images/ # Image assets
+│ └── templates/ # Jinja2 HTML templates
+│ ├── attendance/ # Attendance-related templates
+│ ├── auth/ # Authentication templates
+│ ├── employee/ # Employee management templates
+│ ├── base.html # Base template
+│ ├── 404.html # Error pages
+│ ├── 403.html
+│ └── 500.html
+├── .dockerignore # Docker ignore rules
+├── .gitignore # Git ignore rules
+├── .env # Environment variables (not in repo)
+├── Dockerfile # Docker container configuration
+├── requirements.txt # Python dependencies
+├── requirements-docker.txt # Production Docker dependencies
+├── run.py # Application entry point
+└── README.md # Project documentation
+
+## 🗄️ Database Schema
+
+### Employee Management
+
+1. Employee profiles with comprehensive personal and professional information
+2. Unique employee ID generation and management
+3. Role-based data organization
+
+### Authentication System
+
+1. Secure user credentials with password hashing
+2. Session management with Flask sessions
+3. OTP verification for password reset functionality
+
+### Attendance Tracking
+
+1. Real-time clock in/out records
+2. Automated time duration calculations
+3. Historical attendance data with date-based queries
+4. Daily and weekly attendance summaries
+
+-> Database Platform: MySQL
 
 ## 🚦 Getting Started
 
 ### Prerequisites
 
-Python 3.9+
-Docker Desktop
-Git
+Python 3.9+ - Core runtime environment
+pip - Python package manager
+Docker Desktop - For containerized development
+Git - Version control system
+MySQL - Database server
+Gmail Account - For email functionality (SMTP)
 
-## Local Development
+## Local Development setup
 
 ### Clone the repository
 
@@ -44,7 +134,7 @@ cd employee_nexus
 ### Create virtual environment
 
 ```bash
-bashpython -m venv .venv
+python -m venv .venv
 ```
 
 #### Windows
@@ -85,45 +175,6 @@ docker build -t employee-nexus .
 docker run -p 5000:5000 employee-nexus
 ```
 
-### Access the application
-
-Open browser: http://localhost:5000
-
-## 📁 Project Structure
-
-employee_nexus/
-├── .github/
-│ └── workflows/
-│ └── deploy.yml # GitHub Actions CI/CD
-├── app/ # Flask application
-│ ├── **init**.py
-│ ├── routes.py
-│ └── templates/
-├── .dockerignore
-├── .gitignore
-├── Dockerfile # Docker configuration
-├── requirements.txt # Python dependencies
-├── requirements-docker.txt # Production dependencies
-├── run.py # Application entry point
-└── README.md
-
-## 🔄 CI/CD Pipeline
-
-This project uses GitHub Actions for automated deployment:
-
-### Workflow Trigger
-
-Automatic: Push to main branch
-Manual: Workflow dispatch
-
-### Deployment Process
-
-📝 Code pushed to GitHub
-🔄 GitHub Actions triggered
-📦 Application packaged
-🚀 Deployed to AWS Elastic Beanstalk
-✅ Live application updated
-
 ## 🐳 Docker Configuration
 
 The application is containerized using Docker for consistent deployment across environments.
@@ -134,18 +185,79 @@ docker build -t employee-nexus .
 docker run -p 5000:5000 employee-nexus
 ```
 
-## ☁️ AWS Deployment
+### Access the application
 
-### Infrastructure
+Open browser: http://localhost:5000
+
+## 🔄 CI/CD Pipeline
+
+This project uses GitHub Actions for automated deployment to AWS Elastic Beanstalk.
+
+### Workflow Trigger
+
+Automatic: Push to main branch
+Manual: Workflow dispatch from GitHub Actions tab
+
+### Deployment Process
+
+📝 Code pushed to GitHub repository
+🔄 GitHub Actions triggered automatically
+📦 Application packaged built and tested
+🚀 Deployed to AWS Elastic Beanstalk
+✅ Live application updated with zero downtime
+
+### Pipeline Configuration
+
+The deployment pipeline is configured in .github/workflows/deploy.yml and includes:
+
+1. Environment setup
+2. Dependency installation
+3. Application packaging
+4. AWS deployment with proper credentials
+
+## ☁️ AWS Deployment Architecture
+
+### Infrastructure Details
 
 Platform: AWS Elastic Beanstalk
 Environment: employee-nexus-docker-env
 Region: eu-north-1
 Instance Type: t3.micro
 
+### Deployment Configuration
+
+The application is deployed using Docker containers on AWS Elastic Beanstalk, providing:
+
+1. Automatic scaling based on traffic
+2. Health monitoring and automatic recovery
+3. Rolling deployments for zero downtime
+4. SSL/TLS termination at load balancer
+
 ## 🔍 API Endpoints
 
-EndpointMethodDescription/GETHome page/healthGETHealth check endpoint
+### Core Application
+
+/ - GET - Application home page and employee registration
+/submit - POST - Employee registration form submission
+/health - GET - Health check endpoint for monitoring
+
+### Authentication System
+
+/auth/login - GET, POST - User login with credential validation
+/auth/logout - POST - Secure user logout and session cleanup
+/auth/forgot-password - GET, POST - Initiate password reset process
+/auth/verify-otp - GET, POST - OTP verification for password reset
+/auth/resend-otp - POST- Resend OTP for verification/auth/reset-password-verified/<token> - GET, POST - Reset password after OTP verification
+
+### Employee Management
+
+/employee/dashboard - GET - Employee dashboard with profile information
+
+### Attendance Management
+
+/attendance/dashboard - GET- Attendance dashboard with current status
+/attendance/clock-in - POST - Record employee clock-in time
+/attendance/clock-out - POST - Record employee clock-out time
 
 ### Health Check
 
@@ -153,10 +265,11 @@ EndpointMethodDescription/GETHome page/healthGETHealth check endpoint
 curl https://employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasticbeanstalk.com/health
 ```
 
-## 🚀 Deployment
+## 🚀 Deployment Guide
 
-Automatic Deployment
-Simply push to the main branch:
+### Automatic Deployment
+
+The easiest way to deploy is through the automated CI/CD pipeline:
 
 ```bash
 git add .
@@ -164,27 +277,34 @@ git commit -m "Your changes"
 git push origin main
 ```
 
-## Manual Deployment
+The GitHub Actions workflow will automatically deploy your changes to AWS.
 
-Using AWS EB CLI:
+## Manual Deployment(AWS EB CLI)
+
+If you have AWS EB CLI installed:
 
 ```bash
 eb deploy
 ```
 
-## 🔧 Development
+## 🔧 Development Workflow
 
 ### Adding New Features
 
-Create a feature branch
+1. Create a feature branch:
 
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
-### Make your changes
+2. Develop your feature following the existing structure:
 
-Test locally
+- Add database models in db_models/
+- Create forms in appropriate module forms.py
+- Add routes in module routes.py
+- Create templates in templates/
+
+3. Test locally
 
 ```bash
 python run.py
@@ -192,7 +312,7 @@ or
 docker build -t employee-nexus . && docker run -p 5000:5000 employee-nexus
 ```
 
-### Commit and push
+4. Commit and push
 
 ```bash
 git add .
@@ -200,7 +320,7 @@ git commit -m "Add your feature"
 git push origin feature/your-feature-name
 ```
 
-### Create a Pull Request
+5. Create a Pull Request on GitHub
 
 ## Installing New Dependencies
 
@@ -215,30 +335,60 @@ pip freeze > requirements.txt
 pip freeze > requirements-docker.txt
 ```
 
-## 📊 Monitoring
+## 📊 Monitoring and Maintenance
 
-### Application Health
+### Application Health Monitoring
 
-Health Endpoint: /health
-AWS Console: Elastic Beanstalk environment health
-GitHub Actions: Deployment status
+Health Endpoint: /health- Returns application status
+AWS Console: Monitor through Elastic Beanstalk dashboard
+GitHub Actions: Track deployment status and history
 
-### Checking Logs
+### Checking Application Logs
 
 ```bash
 # AWS EB CLI logs
-eb logs
+eb logs --all
 
 # Docker container logs
 docker logs <container_id>
 
 # Check running containers
 docker ps
+
+# Follow logs in real-time
+docker logs -f <container_id>
 ```
 
 ## 🔧 Troubleshooting
 
-## Common Commands
+## Common Issues and Solutions
+
+### Application won't start locally:
+
+```bash
+#Check Python version
+python --version
+
+# Verify virtual environment is activated
+which python
+
+# Check if all dependencies are installed
+pip list
+
+# Verify environment variables
+echo $SECRET_KEY  # Linux/Mac
+echo %SECRET_KEY% # Windows
+```
+
+### Database connection issues:
+
+```bash
+# Test MySQL connection
+mysql -h localhost -u your_username -p
+
+# Check if database exists
+SHOW DATABASES;
+```
 
 ### Check application status:
 
@@ -280,18 +430,38 @@ git clean -fd
 
 ## 🔒 Security
 
-Environment variables for sensitive data
-GitHub Secrets for CI/CD credentials
-IAM roles with minimal permissions
-Non-root Docker containers
+### Implemented Security Measures
+
+1. Environment Variables: Sensitive data stored in environment variables
+2. Password Hashing: Werkzeug secure password hashing
+3. Session Management: Flask secure session handling
+4. OTP Verification: Time-based one-time passwords for password reset
+5. CSRF Protection: Flask-WTF CSRF tokens on all forms
+6. Input Validation: Comprehensive form validation and sanitization
+
+### Security Configuration
+
+1. GitHub Secrets for CI/CD credentials
+2. AWS IAM roles with minimal required permissions
+3. Non-root Docker containers
+4. Secure email configuration with app passwords
 
 ## 🤝 Contributing
 
-Fork the repository
-Create a feature branch
-Make your changes
-Test locally
-Submit a pull request
+1. Fork the repository on GitHub
+2. Create a feature branch from main
+3. Make your changes following our coding standards
+4. Add tests for new functionality
+5. Update documentation as needed
+6. Test locally to ensure everything works
+7. Submit a pull request with a clear description
+
+## 🙏 Acknowledgments
+
+1. Flask community for the excellent web framework
+2. AWS for reliable cloud infrastructure
+3. GitHub Actions for seamless CI/CD
+4. Bootstrap for responsive UI components
 
 ## 📄 License
 

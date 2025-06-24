@@ -27,6 +27,20 @@
                 <a class="navbar-brand mb-0 text-white h5 font-weight-bold" href="#">exus</a>
             </div>
             
+            <!-- ADD NAVIGATION LINKS HERE (between the brand and logout button) -->
+            <div class="navbar-nav mr-auto ml-4">
+                <a class="nav-link text-white" href="/dashboard">
+                    <i class="fa fa-user"></i> Profile
+                </a>
+                <a class="nav-link text-white" href="/attendance/dashboard">
+                    <i class="fa fa-clock-o"></i> Attendance
+                </a>
+                <a class="nav-link text-white" href="/employee/all_data">
+                    <i class="fa fa-users"></i> All Employees
+                </a>
+            </div>
+            <!-- END OF NAVIGATION LINKS -->
+
             <form action="/logout" method="POST">
                 <button type="submit" class="btn btn-outline-light btn-sm shadow px-4">
                     <i class="fa fa-sign-out me-2"></i> Logout

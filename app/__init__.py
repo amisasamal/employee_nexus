@@ -25,9 +25,11 @@ def create_app(config_class=None):
     # Register blueprints
     from .authentication.routes import auth_bp
     from .employee.routes import employee_bp
+    from .attendance.routes import attendance  # Add this line
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(employee_bp)
+    app.register_blueprint(attendance, url_prefix='/attendance')  # Add this line
     
     register_error_handlers(app)
     

@@ -11,6 +11,14 @@ class ForgotPasswordForm(FlaskForm):
     email = StringField('Email ID:', validators=[DataRequired()])
     submit = SubmitField('Next')
 
+class OTPVerificationForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    otp_code = StringField('OTP Code', validators=[
+        DataRequired(), 
+        Length(min=6, max=6, message="OTP must be 6 digits")
+    ])
+    submit = SubmitField('Verify OTP')
+
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('New Password:', validators=[
         DataRequired(), 

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Employee attendance dashboard.">
+    <meta name="amisa" content="Nexus">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../static/assets/css/master.min.css">
+    <link rel="stylesheet" href="../static/assets/css/fonts.min.css">
+    <link rel="stylesheet" href="../static/css/styles.css">
+
+    <title>Attendance Dashboard</title>
+</head>
+<body>
+
+    <!-- Navigation Bar (same as your existing) -->
+    <nav class="navbar navbar-expand-lg" style="background: linear-gradient(to right, #0270e7, #029ed2);">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <img src="../static/images/favicon.png" width="23em" alt="logo"> 
+                <a class="navbar-brand mb-0 text-white h5 font-weight-bold" href="#">exus</a>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="navbar-nav mr-auto">
+                <a class="nav-link text-white" href="/dashboard">
+                    <i class="fa fa-user"></i> Profile
+                </a>
+                <a class="nav-link text-white" href="/attendance/dashboard">
+                    <i class="fa fa-clock-o"></i> Attendance
+                </a>
+                <!-- <a class="nav-link text-white" href="/employee/all_data">
+                    <i class="fa fa-users"></i> All Employees
+                </a> -->
+            </div>
+            
+            <form action="/logout" method="POST">
+                <button type="submit" class="btn btn-outline-light btn-sm shadow px-4">
+                    <i class="fa fa-sign-out me-2"></i> Logout
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'warning' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Attendance Dashboard Content -->
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h2 class="mb-2">Attendance Dashboard</h2>
+                <p class="text-muted">Welcome, {{ user.first_name }} {{ user.last_name }} (ID: {{ user.employee_id }})</p>
+            </div>
+        </div>
+        
+        <!-- Today's Attendance Card -->
+        <div class="card p-4 shadow mb-4">
+            <div class="card-header font-weight-bold" style="background: linear-gradient(to right, #0270e7, #029ed2); color: white;">
+                <i class="fa fa-calendar"></i> Today's Attendance - {{ current_date.strftime('%A, %B %d, %Y') }}
+            </div>
+            <div class="card-body">
+                {% if today_attendance %}
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h6 class="text-success">Clock In Time</h6>
+                            <h4 class="text-success">
+                                <i class="fa fa-sign-in"></i>
+                                {{ today_attendance.clock_in.strftime('%I:%M %p') }}
+                            </h4>
+                        </div>
+                        <div class="col-md-4">
+                            {% if today_attendance.clock_out %}
+                                <h6 class="text-danger">Clock Out Time</h6>
+                                <h4 class="text-danger">
+                                    <i class="fa fa-sign-out"></i>
+                                    {{ today_attendance.clock_out.strftime('%I:%M %p') }}
+                                </h4>
+                            {% else %}
+                                <h6 class="text-warning">Status</h6>
+                                <h4 class="text-warning">
+                                    <i class="fa fa-clock-o"></i> Currently Working
+                                </h4>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            {% if today_attendance.clock_out %}
+                                <h6>Total Hours</h6>
+                                <h4 class="text-info">
+                                    <i class="fa fa-hourglass-end"></i>
+                                    {{ today_attendance.total_hours }} hrs
+                                </h4>
+                            {% else %}
+                                <h6>Action</h6>
+                                <form method="POST" action="{{ url_for('attendance.clock_out') }}">
+                                    <button type="submit" class="btn btn-danger btn-lg shadow">
+                                        <i class="fa fa-sign-out"></i> Clock Out
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center">
+                        <h5 class="text-muted mb-3">You haven't clocked in today</h5>
+                        <form method="POST" action="{{ url_for('attendance.clock_in') }}">
+                            <button type="submit" class="btn btn-success btn-lg shadow">
+                                <i class="fa fa-sign-in"></i> Clock In
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Recent Attendance History -->
+        <div class="card p-4 shadow">
+            <div class="card-header font-weight-bold">
+                <i class="fa fa-history"></i> Recent Attendance History
+            </div>
+            <div class="card-body">
+                {% if recent_attendance %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead style="background: linear-gradient(to right, #0270e7, #029ed2); color: white;">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Day</th>
+                                    <th>Clock In</th>
+                                    <th>Clock Out</th>
+                                    <th>Total Hours</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for att in recent_attendance %}
+                                <tr>
+                                    <td><strong>{{ att.date.strftime('%Y-%m-%d') }}</strong></td>
+                                    <td>{{ att.date.strftime('%A') }}</td>
+                                    <td>
+                                        {% if att.clock_in %}
+                                            <span class="text-success">
+                                                <i class="fa fa-sign-in"></i>
+                                                {{ att.clock_in.strftime('%I:%M %p') }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if att.clock_out %}
+                                            <span class="text-danger">
+                                                <i class="fa fa-sign-out"></i>
+                                                {{ att.clock_out.strftime('%I:%M %p') }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">
+                                                <i class="fa fa-clock-o"></i> Working
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if att.total_hours %}
+                                            <strong>{{ att.total_hours }} hrs</strong>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success">{{ att.status.title() }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fa fa-inbox fa-3x mb-3"></i>
+                        <p>No attendance records found. Start by clocking in!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+</body>
+</html>

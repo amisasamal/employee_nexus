@@ -3,7 +3,8 @@ from werkzeug.security import generate_password_hash
 import uuid
 
 from .forms import EmployeeRegistrationForm
-from ..db_models.employee_db import submit_data, get_user_by_email
+from ..db_models.employee_db import submit_data
+from ..db_models.auth_db import get_user_by_email
 
 employee_bp = Blueprint('employee', __name__)
 
