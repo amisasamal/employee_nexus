@@ -32,12 +32,13 @@ Production Application: employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasti
 ## 🛠 Tech Stack
 
 Backend: Python, Flask
-Database: MySQL
+Database: MySQL with custom data access layer
 Containerization: Docker
 CI/CD: GitHub Actions
 Cloud: AWS Elastic Beanstalk
 Frontend: HTML5, CSS3, JavaScript, Bootstrap 5
 Security: Werkzeug password hashing, Flask-Login, OTP Verification, Session Management
+Email Service: SMTP with Gmail integration
 
 ## 📁 Project Structure
 
@@ -110,6 +111,92 @@ employee_nexus/
 4. Daily and weekly attendance summaries
 
 -> Database Platform: MySQL
+
+## 🗄️ AWS RDS MySQL Setup
+
+### Production Database Configuration
+
+This application uses AWS RDS MySQL as the production database for scalability, reliability, and managed maintenance.
+
+1. Create RDS MySQL Instance
+2. Configure Security Group
+3. Database Schema Setup
+
+   #Connect to RDS MySQL:
+
+   ```bash
+   mysql -h employee-nexus-db.ctqyu00myxw1.eu-north-1.rds.amazonaws.com -u admin -p
+   ```
+
+   #Create Database Schema:
+
+   ```bash
+   -- Create the main database
+   CREATE DATABASE employee_nexus;
+   USE employee_nexus;
+
+   -- Employee details table
+   CREATE TABLE employee_details (
+       employee_id VARCHAR(50) PRIMARY KEY,
+       salutation VARCHAR(10),
+       first_name VARCHAR(100) NOT NULL,
+       middle_name VARCHAR(100),
+       last_name VARCHAR(100) NOT NULL,
+       date_of_birth DATE,
+       joined_on DATE,
+       post VARCHAR(200),
+       mobile_number VARCHAR(15),
+       email_id VARCHAR(100) UNIQUE NOT NULL,
+       password VARCHAR(255) NOT NULL,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+   );
+
+   -- Attendance records table
+   CREATE TABLE attendance_records (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       employee_id VARCHAR(50) NOT NULL,
+       date DATE NOT NULL,
+       clock_in_time DATETIME,
+       clock_out_time DATETIME,
+       total_hours DECIMAL(4,2),
+       status VARCHAR(20) DEFAULT 'present',
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       FOREIGN KEY (employee_id) REFERENCES employee_details(employee_id)
+   );
+
+   -- Password reset OTPs table
+   CREATE TABLE password_reset_otps (
+       id INT AUTO_INCREMENT PRIMARY KEY,
+       email VARCHAR(100) NOT NULL,
+       otp_code VARCHAR(10) NOT NULL,
+       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       expires_at TIMESTAMP NOT NULL,
+       is_used BOOLEAN DEFAULT FALSE
+   );
+
+   -- Verify tables creation
+   SHOW TABLES;
+   ```
+
+4. Environment Variables Configuration
+5. Database Connection Code
+   #Application Configuration (`app/config.py` and `app/db_models/base_db.py`)
+   -> Your application uses a clean architecture where:
+   - `config.py` reads environment variables from AWS
+   - `base_db.py` uses Flask configuration for database connections
+
+## RDS Management Commands
+
+### Connection Testing:
+
+```bash
+# Test RDS connection
+mysql -h employee-nexus-db.ctqyu00myxw1.eu-north-1.rds.amazonaws.com -u admin -p
+
+# Check database status
+SELECT VERSION();
+SHOW DATABASES;
+```
 
 ## 🚦 Getting Started
 
