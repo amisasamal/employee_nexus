@@ -4,7 +4,7 @@ A comprehensive Flask web application with automated CI/CD pipeline for complete
 
 ## 🚀 Live Demo
 
-Production Application: employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasticbeanstalk.com
+Production Application: employee-nexus-india-env.eba-iamy5r83.ap-south-1.elasticbeanstalk.com
 
 ## ✨ Features
 
@@ -17,6 +17,7 @@ Production Application: employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasti
 👥 User Management - Role-based access control and user administration
 📈 Attendance History - Detailed historical attendance records
 🕐 Real-time Status - Live employee status tracking
+🇮🇳 IST Timezone Support - All timestamps displayed in Indian Standard Time
 
 ### Technical Features
 
@@ -28,6 +29,7 @@ Production Application: employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasti
 📊 Health Monitoring - Application status and performance tracking
 🔒 Secure Configuration - Environment-based security settings
 🗄️ Modular Database - Organized data layer with separation of concerns
+⏰ IST Timezone Database - Database configured for Indian Standard Time
 
 ## 🛠 Tech Stack
 
@@ -109,8 +111,9 @@ employee_nexus/
 2. Automated time duration calculations
 3. Historical attendance data with date-based queries
 4. Daily and weekly attendance summaries
+5. All times stored and displayed in Indian Standard Time
 
--> Database Platform: MySQL
+-> Database Platform: MySQL with IST timezone configuration
 
 ## 🗄️ AWS RDS MySQL Setup
 
@@ -125,7 +128,8 @@ This application uses AWS RDS MySQL as the production database for scalability, 
    #Connect to RDS MySQL:
 
    ```bash
-   mysql -h employee-nexus-db.ctqyu00myxw1.eu-north-1.rds.amazonaws.com -u admin -p
+   # Connect to Mumbai RDS MySQL instance:
+   mysql -h employee-nexus-db-ist.claoauoetd5.ap-south-1.rds.amazonaws.com -u admin -p
    ```
 
    #Create Database Schema:
@@ -184,19 +188,6 @@ This application uses AWS RDS MySQL as the production database for scalability, 
    -> Your application uses a clean architecture where:
    - `config.py` reads environment variables from AWS
    - `base_db.py` uses Flask configuration for database connections
-
-## RDS Management Commands
-
-### Connection Testing:
-
-```bash
-# Test RDS connection
-mysql -h employee-nexus-db.ctqyu00myxw1.eu-north-1.rds.amazonaws.com -u admin -p
-
-# Check database status
-SELECT VERSION();
-SHOW DATABASES;
-```
 
 ## 🚦 Getting Started
 
@@ -349,7 +340,7 @@ The application is deployed using Docker containers on AWS Elastic Beanstalk, pr
 ### Health Check
 
 ```bash
-curl https://employee-nexus-docker-env.eba-42cdhvu8.eu-north-1.elasticbeanstalk.com/health
+curl https://Employee-nexus-india-env.eba-iamy5r83.ap-south-1.elasticbeanstalk.com/health
 ```
 
 ## 🚀 Deployment Guide
@@ -371,7 +362,7 @@ The GitHub Actions workflow will automatically deploy your changes to AWS.
 If you have AWS EB CLI installed:
 
 ```bash
-eb deploy
+eb deploy --region ap-south-1
 ```
 
 ## 🔧 Development Workflow
@@ -471,10 +462,14 @@ echo %SECRET_KEY% # Windows
 
 ```bash
 # Test MySQL connection
-mysql -h localhost -u your_username -p
+# Test Mumbai RDS connection
+mysql -h employee-nexus-db-ist.claoauoetd5.ap-south-1.rds.amazonaws.com -u admin -p
 
 # Check if database exists
 SHOW DATABASES;
+
+# Verify timezone
+SELECT @@time_zone;
 ```
 
 ### Check application status:
@@ -532,6 +527,7 @@ git clean -fd
 2. AWS IAM roles with minimal required permissions
 3. Non-root Docker containers
 4. Secure email configuration with app passwords
+5. VPC security groups for database access
 
 ## 🤝 Contributing
 
@@ -554,4 +550,4 @@ git clean -fd
 
 This project is licensed under the MIT License.
 
-Built with ❤️ using Flask, Docker, and AWS
+🇮🇳 Built with ❤️ using Flask, Docker, and AWS
