@@ -1,4 +1,4 @@
-name: Deploy to Elastic Beanstalk
+name: Deploy to Elastic Beanstalk Mumbai
 
 on:
   push:
@@ -15,14 +15,14 @@ jobs:
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*' '*node_modules*' '*.DS_Store*'
 
-      - name: Deploy to EB
+      - name: Deploy to EB Mumbai
         uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: employee-nexus
-          environment_name: employee-nexus-docker-env
-          region: eu-north-1
+          application_name: employee-nexus-india
+          environment_name: Employee-nexus-india-env
+          region: ap-south-1
           version_label: ${{ github.run_number }}-${{ github.sha }}
           deployment_package: deploy.zip
           wait_for_environment_recovery: 60
